@@ -1,19 +1,19 @@
 package me.timomcgrath.roadbook.utils
 
-import android.Manifest
 import android.app.Activity
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
-import androidx.core.app.ActivityCompat
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.gson.Gson
 import me.timomcgrath.roadbook.RoadBookApplication
+import org.json.JSONException
 import org.json.JSONObject
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 
 class DriveDataUtils constructor(private var activity: Activity) {
     private var app = RoadBookApplication() //global variables
@@ -22,161 +22,117 @@ class DriveDataUtils constructor(private var activity: Activity) {
     private val weatherApiKey = ai.metaData["weatherApiKey"].toString()
     private val radarApiKey = ai.metaData["radarApiKey"].toString()
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private var locationAtStartOfDrive: Location? = null
-    private var locationAtEndOfDrive: Location? = null
-    private var currentLocation: Location? = null
-    private var currentWeather: JSONObject? = null
+    private var timeOfDay = ""
     private var units = app.getUnitsType() //metric or imperial; used in api calls
     private val queue = Volley.newRequestQueue(activity)
-    private val weatherApiRequestUrl = { lat: Double, lon: Double -> "api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$weatherApiKey" }
 
-    private fun initLocationServices() {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
+    interface VolleyCallback {
+        fun onSuccess(jsonObject: JSONObject)
     }
 
-    fun startDrive() {
-        initLocationServices()
-
-        if (ActivityCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location : Location? ->
-                locationAtStartOfDrive = location
-                currentLocation = location
-            }
-    }
-
-    fun endDrive() {
-        if (ActivityCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location : Location? ->
-                locationAtEndOfDrive = location
-                currentLocation = location
-            }
-    }
-
-    fun getLocation(): Location? {
-        var loc: Location? = null
-        if (ActivityCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return null
-        }
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location : Location? ->
-                loc = location
-            }
-        currentLocation = loc
-        return loc
-    }
-
-    private fun makeWeatherApiGETRequest(lat: Double, lon: Double): JSONObject? {
-        var response: JSONObject? = null
-
-        val jsonObjectRequest = JsonObjectRequest(Request.Method.GET,
-            weatherApiRequestUrl(lat, lon), null,
-            { res ->
-                response = res
+    private fun getJsonObject(method: Int, url: String, callback: VolleyCallback) {
+        val jsonObjectRequest = JsonObjectRequest(method, url, null,
+            { response ->
+                callback.onSuccess(response)
             },
-            { err ->
-                //response is null
-            }
-        )
+            { error ->
+                error.printStackTrace()
+            })
         queue.add(jsonObjectRequest)
-        return response
     }
 
-    fun getWeatherConditions(): String? {
-        if (currentLocation != null) {
-            return if (currentWeather != null) {
-                currentWeather!!.getJSONArray("weather").getJSONObject(0).getString("main")
-            } else {
-                currentWeather = makeWeatherApiGETRequest(currentLocation!!.latitude, currentLocation!!.longitude)
-                currentWeather!!.getJSONArray("weather").getJSONObject(0).getString("main")
-            }
-        }
-        // TODO: Handle unsafe api call
-        return null
-    }
-
-    fun getTimeOfDay(): String {
-        var sunsetTime: Long?
-        var sunriseTime: Long?
-        var currentTime: Long = System.currentTimeMillis()
-
-        if (currentLocation != null) {
-            if (currentWeather != null) {
-                sunsetTime = currentWeather!!.getJSONObject("sys").getLong("sunset")
-                sunriseTime = currentWeather!!.getJSONObject("sys").getLong("sunrise")
-            } else {
-                currentWeather = makeWeatherApiGETRequest(currentLocation!!.latitude, currentLocation!!.longitude)
-                sunsetTime = currentWeather!!.getJSONObject("sys").getLong("sunset")
-                sunriseTime = currentWeather!!.getJSONObject("sys").getLong("sunrise")
-            }
-        } else {
-            //should never occur
-            return "Error: Current location is null"
-        }
-
-        return if (currentTime >= sunriseTime && currentTime <= sunsetTime) {
-            "Day"
-        } else {
-            "Night"
-        }
-    }
-
-    fun getRoadDistanceTravelled(): JSONObject? {
-        if (locationAtStartOfDrive != null && locationAtEndOfDrive != null) {
-            var response: JSONObject? = null
-            val originLatitude: Double = locationAtStartOfDrive!!.latitude
-            val originLongitude: Double = locationAtStartOfDrive!!.longitude
-
-            val destinationLatitude: Double = locationAtEndOfDrive!!.latitude
-            val destinationLongitude: Double = locationAtEndOfDrive!!.longitude
-
-            val jsonObjectRequest = object: JsonObjectRequest(Request.Method.GET,
-                "https://api.radar.io/v1/route/distance?origin=${originLatitude},${originLongitude}&destination=${destinationLatitude},${destinationLongitude}&modes=car&units=${units}", null,
-                { res ->
-                    response = res
-                },
-                { err ->
-                    err.message?.let { Log.d("DriveDataUtils", it) }
-                    // TODO: Handle error response
-                })
-            {
-                override fun getHeaders(): MutableMap<String, String> {
-                    val headers = HashMap<String, String>()
-                    headers["Authorization"] = "Basic $radarApiKey"
-                    return headers
+    fun getWeatherConditions(lat: Double, lon: Double, listener: WeatherConditionsListener) {
+        getJsonObject(Request.Method.GET, "https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherApiKey}", object: VolleyCallback {
+            override fun onSuccess(jsonObject: JSONObject) {
+                try {
+                    val weatherInfo: JSONObject = jsonObject.getJSONArray("weather").getJSONObject(0)
+                    listener.onSuccess(weatherInfo.getString("main"))
+                } catch (e: JSONException) {
+                    e.printStackTrace()
                 }
             }
-            queue.add(jsonObjectRequest)
-            return response
-        }
-        return null
+        })
     }
+
+    interface WeatherConditionsListener {
+        fun onSuccess(weatherConditions: String)
+
+        // TODO: Implement onError
+    }
+
+
+    fun getTimeOfDay(lat: Double, lon: Double, listener: TimeOfDayListener) {
+        getJsonObject(Request.Method.GET, "https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=${weatherApiKey}&units=$units", object: VolleyCallback {
+            override fun onSuccess(jsonObject: JSONObject) {
+                try {
+                    val sunrise: Long = jsonObject.getJSONObject("sys").getLong("sunrise")
+                    val sunset: Long = jsonObject.getJSONObject("sys").getLong("sunset")
+                    val currentTime:Long = jsonObject.getLong("dt")
+                    //debug
+                    Log.d(TAG, sunrise.toString())
+                    Log.d(TAG, sunset.toString())
+                    Log.d(TAG, currentTime.toString())
+                    timeOfDay = if (currentTime in sunrise..sunset) {
+                        "Day"
+                    } else {
+                        "Night"
+                    }
+                    listener.onSuccess(timeOfDay)
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            }
+        })
+    }
+
+    interface TimeOfDayListener {
+        fun onSuccess(timeOfDay: String)
+
+        // TODO: Implement onError
+    }
+
+    fun createDriveDataModel(originLocation: Location, destinationLocation: Location, timeOfDay: String, weatherConditions: String,  distanceTravelled: Int, timeElapsed: Long): DriveDataModel {
+        return DriveDataModel(DateTimeFormatter.ISO_INSTANT.format(Instant.now()), originLocation, destinationLocation, distanceTravelled, timeElapsed, timeOfDay, weatherConditions)
+    }
+
+    fun saveDriveData(driveDataModel: DriveDataModel) {
+        val driveDataFileName = "driveData.json"
+        val files: Array<String> = activity.fileList()
+        var gson = Gson()
+        var driveDataModelString = gson.toJson(driveDataModel).toString()
+
+        Log.d(TAG, driveDataModelString)
+    }
+
+
+
+
+//    fun getRoadDistanceTravelled(callback: ): JSONObject? {
+//        var response: JSONObject? = null
+//
+//        val originLatitude: Double = locationAtStartOfDrive.latitude
+//        val originLongitude: Double = locationAtStartOfDrive.longitude
+//
+//        val destinationLatitude: Double = locationAtEndOfDrive.latitude
+//        val destinationLongitude: Double = locationAtEndOfDrive.longitude
+//
+//        val jsonObjectRequest = object: JsonObjectRequest(Method.GET,
+//            "https://api.radar.io/v1/route/distance?origin=${originLatitude},${originLongitude}&destination=${destinationLatitude},${destinationLongitude}&modes=car&units=${units}", null,
+//            { res ->
+//                response = res
+//            },
+//            { err ->
+//                err.message?.let { Log.d("DriveDataUtils", it) }
+//            })
+//        {
+//            override fun getHeaders(): MutableMap<String, String> {
+//                val headers = HashMap<String, String>()
+//                headers["Authorization"] = "Basic $radarApiKey"
+//                return headers
+//            }
+//        }
+//        queue.add(jsonObjectRequest)
+//        return response
+//    }
 }
 private const val TAG="DriveDataUtils"

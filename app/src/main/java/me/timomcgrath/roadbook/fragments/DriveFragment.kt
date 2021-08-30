@@ -1,16 +1,22 @@
 package me.timomcgrath.roadbook.fragments
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.location.Location
+import android.location.LocationManager
+import android.os.AsyncTask
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.fragment_drive.*
+import android.widget.Button
 import me.timomcgrath.roadbook.R
 import me.timomcgrath.roadbook.utils.ChronometerUtils
 import me.timomcgrath.roadbook.utils.DriveDataUtils
+import java.util.function.Consumer
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -33,6 +39,10 @@ class DriveFragment : Fragment() {
     private lateinit var activity: Activity //context
     private lateinit var driveDataUtils: DriveDataUtils
 
+    private val locationManager = requireContext().getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+    private var originLocation = Location("dummyprovider")
+
+
     // Check if context is of activity type, then set driveDataUtils with activity context
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -51,9 +61,9 @@ class DriveFragment : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-        driveDataUtils.startDrive()
     }
 
+    @SuppressLint("MissingPermission")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -65,11 +75,54 @@ class DriveFragment : Fragment() {
         chronometerUtils.createTimer(R.id.driveTimer, R.id.pauseBtn)
         chronometerUtils.startTimer()
 
+        val finishDriveBtn: Button = viewOfLayout.findViewById(R.id.finishDrive)
+        finishDriveBtn.setOnClickListener {
+            finishDrive()
+        }
+
+        // Get origin drive location
+        try {
+            locationManager?.getCurrentLocation(LocationManager.GPS_PROVIDER, null, AsyncTask.THREAD_POOL_EXECUTOR, Consumer { location: Location ->
+                originLocation = location
+            })
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+
         return viewOfLayout
     }
 
-    private fun verifyDrive() {
+    @SuppressLint("MissingPermission")
+    private fun finishDrive() {
+        var destinationLocation: Location = Location("dummyprovider")
 
+        locationManager?.getCurrentLocation(LocationManager.GPS_PROVIDER, null, AsyncTask.THREAD_POOL_EXECUTOR,
+            { location: Location ->
+                location.let {
+                    destinationLocation = location
+                    val lat: Double = location.latitude
+                    val lon: Double = location.longitude
+                    Log.d(TAG, "lat=$lat lon=$lon")
+
+                    // Time of day listener callback
+                    driveDataUtils.getTimeOfDay(lat, lon, object: DriveDataUtils.TimeOfDayListener {
+                        override fun onSuccess(timeOfDay: String) {
+                            Log.d(TAG, "Time of Day: $timeOfDay")
+                            // TODO: Save data
+                        }
+                    })
+
+                    // Weather conditions listener callback
+                    driveDataUtils.getWeatherConditions(lat, lon, object: DriveDataUtils.WeatherConditionsListener {
+                        override fun onSuccess(weatherConditions: String) {
+                            Log.d(TAG, "Weather conditions: $weatherConditions")
+                            // TODO: Save data
+                        }
+                    })
+
+                }
+
+            })
     }
 
     companion object {

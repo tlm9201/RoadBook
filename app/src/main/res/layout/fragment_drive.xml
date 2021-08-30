@@ -4,25 +4,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".VerifyDriveFragment">
+    tools:context=".fragments.DriveFragment">
 
     <Chronometer
         android:id="@+id/driveTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="52sp"
-        app:layout_constraintBottom_toTopOf="@+id/stopDrive"
+        app:layout_constraintBottom_toTopOf="@+id/finishDrive"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
 
     <Button
-        android:id="@+id/stopDrive"
+        android:id="@+id/finishDrive"
         android:layout_width="169dp"
         android:layout_height="55dp"
-        android:onClick="verifyDrive"
-        android:text="Stop Drive"
+        android:text="Finish Drive"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -37,5 +36,5 @@
         android:checked="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/stopDrive" />
+        app:layout_constraintTop_toBottomOf="@+id/finishDrive" />
 </androidx.constraintlayout.widget.ConstraintLayout>
