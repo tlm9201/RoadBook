@@ -1,13 +1,14 @@
 package me.timomcgrath.roadbook.utils
 
-import android.location.Location
-
 data class DriveDataModel (
     val dateTimestamp: String,
-    val originLocation: Location,
-    val destinationLocation: Location,
-    val distanceTravelled: Int,
+    val originLocationLat: Double,
+    val originLocationLon: Double,
+    val destinationLocationLat: Double,
+    val destinationLocationLon: Double,
+    val distanceTravelled: Double,
     val timeElapsed: Long,
     val timeOfDay: String,
-    val weatherConditions: String
+    val weatherConditions: String,
+    val units: String
 )

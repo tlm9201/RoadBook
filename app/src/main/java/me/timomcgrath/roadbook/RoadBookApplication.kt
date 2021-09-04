@@ -3,7 +3,6 @@ package me.timomcgrath.roadbook
 import android.app.Application
 import android.util.Log
 import me.timomcgrath.roadbook.exceptions.InvalidUnitsException
-import java.lang.Exception
 
 class RoadBookApplication : Application() {
 

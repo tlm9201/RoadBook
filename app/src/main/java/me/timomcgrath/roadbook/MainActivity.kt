@@ -3,16 +3,12 @@ package me.timomcgrath.roadbook
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.DialogInterface
-import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.add
-import androidx.fragment.app.commit
-import androidx.fragment.app.replace
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import me.timomcgrath.roadbook.fragments.DriveFragment
@@ -27,7 +23,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
         val navController = navHostFragment.navController
 
         val bottomNavView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
@@ -49,18 +46,23 @@ class MainActivity : AppCompatActivity() {
                     navController.navigate(R.id.infoFragment)
                 }
 
-                else -> {}
+                else -> {
+                }
             }
             true
         }
     }
 
     private fun startNewDrive() {
-        supportFragmentManager.commit {
-            replace<DriveFragment>(R.id.fragmentContainerView)
-            setReorderingAllowed(true)
-            addToBackStack("home")
-        }
+        val frag = supportFragmentManager.findFragmentByTag(DriveFragment.TAG)
+            ?: DriveFragment()
+
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragmentContainerView, frag)
+            .setReorderingAllowed(true)
+            .addToBackStack("home")
+            .commit()
     }
 
     fun startDrive(view: View) {
@@ -73,22 +75,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("MissingSuperCall")
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-           when (requestCode) {
-               LOCATION_PERMISSION_CODE -> {
-                   // If request is cancelled, the result arrays are empty.
-                   if ((grantResults.isNotEmpty() &&
-                               grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                       startNewDrive()
-                   } else {
-                       showPermissionDeniedUI()
-                   }
-                   return
-               }
-               else -> {
-                   // Ignore all other requests.
-               }
-           }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            LOCATION_PERMISSION_CODE -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() &&
+                            grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                ) {
+                    startNewDrive()
+                } else {
+                    showPermissionDeniedUI()
+                }
+                return
+            }
+            else -> {
+                // Ignore all other requests.
+            }
+        }
     }
 
     private fun whyLocationAccessUI(): AlertDialog? {
@@ -97,7 +104,10 @@ class MainActivity : AppCompatActivity() {
             builder.apply {
                 setPositiveButton(R.string.ok,
                     DialogInterface.OnClickListener { dialog, id ->
-                        requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_CODE)
+                        requestPermissions(
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            LOCATION_PERMISSION_CODE
+                        )
                     })
                 setNegativeButton(R.string.cancel,
                     DialogInterface.OnClickListener { dialog, id ->
@@ -128,4 +138,4 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-private const val TAG="MainActivity"
+private const val TAG = "MainActivity"
