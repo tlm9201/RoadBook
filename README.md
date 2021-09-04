@@ -1,6 +1,6 @@
 # RoadBook
 
-Track, log and save automated driving statistics such as distance, time, and weather. 
+Track, log, and save automated driving statistics such as distance, time, and weather. 
 
 ## Installation
 Clone this repository and import into **Android Studio**
