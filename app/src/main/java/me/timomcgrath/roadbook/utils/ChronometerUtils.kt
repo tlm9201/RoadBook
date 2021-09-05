@@ -24,7 +24,7 @@ class ChronometerUtils constructor(var view: View) {
 
     fun startTimer() {
         if (!running) {
-            driveTimer.setBase(SystemClock.elapsedRealtime() + elapsedTime)
+            driveTimer.base = (SystemClock.elapsedRealtime() + elapsedTime)
             driveTimer.start()
             running = true
         }
@@ -32,13 +32,13 @@ class ChronometerUtils constructor(var view: View) {
 
     fun pauseTimer() {
         if (running) {
-            elapsedTime = driveTimer.getBase() - SystemClock.elapsedRealtime()
+            elapsedTime = driveTimer.base - SystemClock.elapsedRealtime()
             driveTimer.stop()
             running = false
         }
     }
 
     fun getElapsedDriveTime(): Long {
-        return abs(elapsedTime)
+        return abs(driveTimer.base - SystemClock.elapsedRealtime())
     }
 }

@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeFragment">
+    tools:context=".fragments.HomeFragment">
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/timerText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="00:00"
-        android:textSize="48sp"
+        android:textSize="38sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:text="Your Total Driving Time"
         android:textSize="12sp"
-        app:layout_constraintBottom_toTopOf="@+id/textView2"
+        app:layout_constraintBottom_toTopOf="@+id/timerText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -32,18 +32,18 @@
         android:id="@+id/startNewDrive"
         android:layout_width="194dp"
         android:layout_height="47dp"
-        android:layout_marginTop="4dp"
         android:onClick="startDrive"
         android:text="New Drive"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        app:layout_constraintTop_toBottomOf="@+id/timerText" />
 
     <ProgressBar
-        android:id="@+id/progressBar2"
+        android:id="@+id/totalProgressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="380dp"
         android:layout_height="16dp"
+        android:max="180000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -51,14 +51,15 @@
         app:layout_constraintVertical_bias="0.42000002" />
 
     <ProgressBar
-        android:id="@+id/progressBar3"
+        android:id="@+id/nighttimeProgressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="380dp"
         android:layout_height="16dp"
+        android:max="36000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/progressBar2"
+        app:layout_constraintTop_toBottomOf="@+id/totalProgressBar"
         app:layout_constraintVertical_bias="0.47000003" />
 
     <TextView
@@ -69,7 +70,7 @@
         android:layout_marginBottom="1dp"
         android:text="Nighttime Driving Progress"
         android:textSize="14sp"
-        app:layout_constraintBottom_toTopOf="@+id/progressBar3"
+        app:layout_constraintBottom_toTopOf="@+id/nighttimeProgressBar"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -80,7 +81,7 @@
         android:layout_marginBottom="1dp"
         android:text="10hrs required"
         android:textSize="12sp"
-        app:layout_constraintBottom_toTopOf="@+id/progressBar3"
+        app:layout_constraintBottom_toTopOf="@+id/nighttimeProgressBar"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
@@ -91,7 +92,7 @@
         android:layout_marginBottom="1dp"
         android:text="50hrs required"
         android:textSize="12sp"
-        app:layout_constraintBottom_toTopOf="@+id/progressBar2"
+        app:layout_constraintBottom_toTopOf="@+id/totalProgressBar"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
@@ -112,7 +113,7 @@
         android:layout_marginBottom="1dp"
         android:text="Total Driving Progress"
         android:textSize="14sp"
-        app:layout_constraintBottom_toTopOf="@+id/progressBar2"
+        app:layout_constraintBottom_toTopOf="@+id/totalProgressBar"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView

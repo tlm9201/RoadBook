@@ -1,60 +1,78 @@
 package me.timomcgrath.roadbook.fragments
 
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.fragment_home.*
 import me.timomcgrath.roadbook.R
+import me.timomcgrath.roadbook.utils.DriveDataUtils
+import java.util.concurrent.TimeUnit
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [HomeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class HomeFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private lateinit var viewOfLayout: View
+    private lateinit var timerText: TextView
+    private lateinit var totalDrivingProgressText: TextView
+    private lateinit var nighttimeDrivingProgressText: TextView
+    private lateinit var totalDrivingProgressBar: ProgressBar
+    private lateinit var nighttimeDrivingProgressBar: ProgressBar
+    private lateinit var driveDataUtils: DriveDataUtils
+    private lateinit var activity: Activity
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    private var totalDriveTime: Long = 0
+    private var nighttimeDriveTime: Long = 0
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        if (context is Activity) {
+            activity = context
+            driveDataUtils = DriveDataUtils(activity)
+        } else {
+            throw RuntimeException("HomeFragment must be created from an activity context")
         }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        viewOfLayout = inflater.inflate(R.layout.fragment_home, container, false)
+        totalDriveTime = driveDataUtils.getTotalDriveTime()
+        nighttimeDriveTime = driveDataUtils.getTotalNighttimeDrivingTime()
+        Log.d(TAG, totalDriveTime.toString())
+
+        timerText = viewOfLayout.findViewById(R.id.timerText)
+
+        totalDrivingProgressText = viewOfLayout.findViewById(R.id.totalDrivingProgress)
+        nighttimeDrivingProgressText = viewOfLayout.findViewById(R.id.nighttimeDrivingProgress)
+
+        totalDrivingProgressBar = viewOfLayout.findViewById(R.id.totalProgressBar)
+        nighttimeDrivingProgressBar = viewOfLayout.findViewById(R.id.nighttimeProgressBar)
+
+        timerText.text = formatMillis("%d hours %d mins", totalDriveTime)
+
+        totalDrivingProgressText.text = formatMillis("%02d:%02d", totalDriveTime)
+        totalDrivingProgressBar.progress = (totalDriveTime.toInt())
+
+
+        nighttimeDrivingProgressText.text = formatMillis("%02d:%02d", nighttimeDriveTime)
+        nighttimeDrivingProgressBar.progress = (nighttimeDriveTime.toInt())
+
+        return viewOfLayout
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment HomeFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            HomeFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    private fun formatMillis(format: String, millis: Long): String {
+        return String.format(format, TimeUnit.MILLISECONDS.toHours(millis),
+            TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)))
     }
+
 }
+private const val TAG="HomeFragment"

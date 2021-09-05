@@ -24,17 +24,51 @@
         android:text="Finish Drive"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ToggleButton
         android:id="@+id/pauseBtn"
         style="@style/toggleButton"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="5dp"
         android:background="@drawable/ic_toggle_bg"
         android:checked="true"
+        android:translationZ="80dp"
+        app:layout_constraintBottom_toBottomOf="@+id/finishDrive"
+        app:layout_constraintStart_toEndOf="@+id/finishDrive"
+        app:layout_constraintTop_toBottomOf="@+id/driveTimer"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <FrameLayout
+        android:id="@+id/loading_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#fff"
+        android:translationZ="90dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/finishDrive" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:translationY="-25dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Loading..."
+            android:translationY="10dp" />
+
+    </FrameLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

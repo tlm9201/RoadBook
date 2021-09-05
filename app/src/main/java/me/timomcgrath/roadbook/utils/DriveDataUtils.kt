@@ -10,6 +10,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.gson.Gson
 import me.timomcgrath.roadbook.RoadBookApplication
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
@@ -30,6 +31,8 @@ class DriveDataUtils constructor(private var activity: Activity) {
     private var timeOfDay = ""
     private var units = app.getUnitsType() //metric or imperial; used in api calls
     private val queue = Volley.newRequestQueue(activity)
+    private val driveDataFileName = "driveData.json"
+
 
     interface VolleyCallback {
         fun onSuccess(jsonObject: JSONObject)
@@ -98,10 +101,7 @@ class DriveDataUtils constructor(private var activity: Activity) {
                         val sunrise: Long = jsonObject.getJSONObject("sys").getLong("sunrise")
                         val sunset: Long = jsonObject.getJSONObject("sys").getLong("sunset")
                         val currentTime: Long = jsonObject.getLong("dt")
-                        //debug
-                        Log.d(TAG, sunrise.toString())
-                        Log.d(TAG, sunset.toString())
-                        Log.d(TAG, currentTime.toString())
+
                         timeOfDay = if (currentTime in sunrise..sunset) {
                             "Day"
                         } else {
@@ -175,7 +175,6 @@ class DriveDataUtils constructor(private var activity: Activity) {
     }
 
     private fun saveDriveData(driveDataModel: DriveDataModel) {
-        val driveDataFileName = "driveData.json"
         val file = File(activity.filesDir, driveDataFileName)
         val gson = Gson()
         val driveDataJSONModel = gson.toJson(driveDataModel)
@@ -187,17 +186,44 @@ class DriveDataUtils constructor(private var activity: Activity) {
             // iterate through listOfLines
             for ((i, value) in listOfLines.withIndex()) {
                 if (value.isEmpty()) {
-                    Log.d(TAG, "loop on: $i iteration")
                     // Change the blank line to driveDataJSONModel
                     listOfLines[i] = "\t$driveDataJSONModel\n"
                     // Add a comma to the previous line
                     listOfLines[i-1] = listOfLines[i-1].plus(",")
                     // Finally, join our new list and write it to driveData.json
                     file.writeText(listOfLines.joinToString("\n"))
+                    Log.d(TAG, "Successfully saved drive data to ${activity.filesDir}/$driveDataFileName")
                     break
                 }
             }
         }
+    }
+
+    fun getTotalDriveTime(): Long {
+        var totalTime: Long = 0
+        val file = File(activity.filesDir, driveDataFileName)
+        val data = JSONArray(file.readText())
+
+        for (i in 0 until data.length())
+            totalTime +=  data.getJSONObject(i).getLong("timeElapsed")
+
+        return totalTime
+    }
+
+    fun getTotalNighttimeDrivingTime(): Long {
+        var totalTime: Long = 0
+        val file = File(activity.filesDir, driveDataFileName)
+        val data = JSONArray(file.readText())
+
+        for (i in 0 until data.length()) {
+            val obj = data.getJSONObject(i)
+
+            if (obj.getString("timeOfDay").equals("Night")) {
+                totalTime +=  obj.getLong("timeElapsed")
+            }
+        }
+
+        return totalTime
     }
 }
 
