@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.fragment_home.*
 import me.timomcgrath.roadbook.R
 import me.timomcgrath.roadbook.utils.DriveDataUtils
 import java.util.concurrent.TimeUnit
@@ -47,7 +46,6 @@ class HomeFragment : Fragment() {
         viewOfLayout = inflater.inflate(R.layout.fragment_home, container, false)
         totalDriveTime = driveDataUtils.getTotalDriveTime()
         nighttimeDriveTime = driveDataUtils.getTotalNighttimeDrivingTime()
-        Log.d(TAG, totalDriveTime.toString())
 
         timerText = viewOfLayout.findViewById(R.id.timerText)
 
@@ -57,21 +55,16 @@ class HomeFragment : Fragment() {
         totalDrivingProgressBar = viewOfLayout.findViewById(R.id.totalProgressBar)
         nighttimeDrivingProgressBar = viewOfLayout.findViewById(R.id.nighttimeProgressBar)
 
-        timerText.text = formatMillis("%d hours %d mins", totalDriveTime)
+        timerText.text = driveDataUtils.formatMillis("%d hours %d mins", totalDriveTime)
 
-        totalDrivingProgressText.text = formatMillis("%02d:%02d", totalDriveTime)
+        totalDrivingProgressText.text = driveDataUtils.formatMillis("%02d:%02d", totalDriveTime)
         totalDrivingProgressBar.progress = (totalDriveTime.toInt())
 
 
-        nighttimeDrivingProgressText.text = formatMillis("%02d:%02d", nighttimeDriveTime)
+        nighttimeDrivingProgressText.text = driveDataUtils.formatMillis("%02d:%02d", nighttimeDriveTime)
         nighttimeDrivingProgressBar.progress = (nighttimeDriveTime.toInt())
 
         return viewOfLayout
-    }
-
-    private fun formatMillis(format: String, millis: Long): String {
-        return String.format(format, TimeUnit.MILLISECONDS.toHours(millis),
-            TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)))
     }
 
 }

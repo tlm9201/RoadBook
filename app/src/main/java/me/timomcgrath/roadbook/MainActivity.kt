@@ -2,10 +2,8 @@ package me.timomcgrath.roadbook
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -16,8 +14,6 @@ import me.timomcgrath.roadbook.utils.LocationUtils.hasLocationPermission
 import me.timomcgrath.roadbook.utils.LocationUtils.requestLocationPermission
 
 class MainActivity : AppCompatActivity() {
-
-    private val LOCATION_PERMISSION_CODE = 1;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,17 +28,14 @@ class MainActivity : AppCompatActivity() {
         bottomNavView.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.logFragment -> {
-                    Log.d(TAG, "log selected")
                     navController.navigate(R.id.logFragment)
                 }
 
                 R.id.homeFragment -> {
-                    Log.d(TAG, "home fragment")
                     navController.navigate(R.id.homeFragment)
                 }
 
                 R.id.infoFragment -> {
-                    Log.d(TAG, "info fragment")
                     navController.navigate(R.id.infoFragment)
                 }
 
@@ -99,21 +92,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun whyLocationAccessUI(): AlertDialog? {
-        val alertDialog: AlertDialog? = this?.let {
+    private fun whyLocationAccessUI(): AlertDialog {
+        val alertDialog: AlertDialog = this.let {
             val builder = AlertDialog.Builder(it)
             builder.apply {
-                setPositiveButton(R.string.ok,
-                    DialogInterface.OnClickListener { dialog, id ->
-                        requestPermissions(
-                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                            LOCATION_PERMISSION_CODE
-                        )
-                    })
-                setNegativeButton(R.string.cancel,
-                    DialogInterface.OnClickListener { dialog, id ->
-                        dialog.dismiss()
-                    })
+                setPositiveButton(R.string.ok
+                ) { _, _ ->
+                    requestPermissions(
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        LOCATION_PERMISSION_CODE
+                    )
+                }
+                setNegativeButton(R.string.cancel
+                ) { dialog, _ ->
+                    dialog.dismiss()
+                }
                 setMessage(R.string.location_permission_dialog_message)
             }
             builder.create()
@@ -123,20 +116,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showPermissionDeniedUI() {
-        val alertDialog: AlertDialog? = this?.let {
+        val alertDialog: AlertDialog = this.let {
             val builder = AlertDialog.Builder(it)
             builder.apply {
-                setPositiveButton(R.string.ok,
-                    DialogInterface.OnClickListener { dialog, id ->
-                        dialog.dismiss()
-                    })
+                setPositiveButton(R.string.ok
+                ) { dialog, _ ->
+                    dialog.dismiss()
+                }
                 setMessage(R.string.permission_denied_message)
             }
             builder.create()
         }
 
-        alertDialog?.show()
+        alertDialog.show()
     }
 }
-
+private const val LOCATION_PERMISSION_CODE = 1
 private const val TAG = "MainActivity"

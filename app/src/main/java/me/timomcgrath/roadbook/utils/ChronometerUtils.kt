@@ -6,7 +6,7 @@ import android.widget.Chronometer
 import android.widget.ToggleButton
 import kotlin.math.abs
 
-class ChronometerUtils constructor(var view: View) {
+class ChronometerUtils constructor(private var view: View) {
     private lateinit var driveTimer: Chronometer
     private var running: Boolean = false
     private var elapsedTime: Long = 0

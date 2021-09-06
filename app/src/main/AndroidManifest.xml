@@ -28,6 +28,18 @@
         <meta-data
             android:name="radarApiKey"
             android:value = "${RADAR_API_KEY}"/>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="me.timomcgrath.roadbook.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <!-- ressource file to create -->
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths">
+            </meta-data>
+        </provider>
     </application>
 
 </manifest>

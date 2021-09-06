@@ -16,6 +16,7 @@ import org.json.JSONObject
 import java.io.File
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 
 class DriveDataUtils constructor(private var activity: Activity) {
     private var app = RoadBookApplication() //global variables
@@ -158,6 +159,10 @@ class DriveDataUtils constructor(private var activity: Activity) {
         distanceTravelled: Double,
         timeElapsed: Long
     ) {
+        var weatherCons = weatherConditions
+        if (weatherConditions == "Clouds")
+            weatherCons = "Normal"
+
         saveDriveData(
             DriveDataModel(
                 DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
@@ -168,7 +173,7 @@ class DriveDataUtils constructor(private var activity: Activity) {
                 distanceTravelled,
                 timeElapsed,
                 timeOfDay,
-                weatherConditions,
+                weatherCons,
                 units
             )
         )
@@ -224,6 +229,26 @@ class DriveDataUtils constructor(private var activity: Activity) {
         }
 
         return totalTime
+    }
+
+    fun getDriveDataList(): List<DriveDataModel> {
+        val gson = Gson()
+        val file = File(activity.filesDir, driveDataFileName)
+        return gson.fromJson(file.readText(), Array<DriveDataModel>::class.java).toList()
+    }
+
+    fun formatMillis(format: String, millis: Long): String {
+        return String.format(format, TimeUnit.MILLISECONDS.toHours(millis),
+            TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)))
+    }
+
+    fun formatMillisWithSeconds(format: String, millis: Long): String {
+        return String.format(format, TimeUnit.MILLISECONDS.toHours(millis),
+            TimeUnit.MILLISECONDS.toMinutes(millis) -
+                    TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
+            TimeUnit.MILLISECONDS.toSeconds(millis) -
+                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)))
+
     }
 }
 

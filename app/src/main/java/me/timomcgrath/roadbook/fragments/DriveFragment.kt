@@ -2,7 +2,6 @@ package me.timomcgrath.roadbook.fragments
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.ProgressDialog
 import android.content.Context
 import android.location.Location
 import android.location.LocationManager
@@ -14,10 +13,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.activity_main.*
 import me.timomcgrath.roadbook.R
 import me.timomcgrath.roadbook.utils.ChronometerUtils
 import me.timomcgrath.roadbook.utils.DriveDataUtils

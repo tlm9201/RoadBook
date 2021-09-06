@@ -1,60 +1,75 @@
 package me.timomcgrath.roadbook.fragments
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.view.*
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import com.github.barteksc.pdfviewer.PDFView
 import me.timomcgrath.roadbook.R
+import me.timomcgrath.roadbook.utils.PdfGeneratorUtils
+import java.io.File
+import java.io.FileOutputStream
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [LogFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class LogFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private lateinit var viewOfLayout: View
+    private lateinit var activity: Activity
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    // Check if context is of activity type, then set pdfGeneratorUtils with activity context
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        if (context is Activity) {
+            activity = context
+        } else {
+            throw RuntimeException("LogFragment must be created from an activity context")
         }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_log, container, false)
+        setHasOptionsMenu(true)
+        viewOfLayout = inflater.inflate(R.layout.fragment_log, container, false)
+        getPdf()
+
+        return viewOfLayout
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment LogFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            LogFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        menu.clear()
+        inflater.inflate(R.menu.share_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.share -> sharePdf()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun sharePdf() {
+        val file = File("${activity.filesDir}/$FILENAME")
+        val sendIntent: Intent = Intent().apply {
+            type = "application/pdf"
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(activity, "me.timomcgrath.roadbook.provider", file))
+            putExtra(Intent.EXTRA_SUBJECT, "Sharing file...")
+            putExtra(Intent.EXTRA_TEXT, "Sharing file...")
+        }
+        startActivity(Intent.createChooser(sendIntent, "Share file"))
+    }
+
+
+    private fun getPdf() {
+        val pdfView = viewOfLayout.findViewById<PDFView>(R.id.pdfView)
+        val file = File("${activity.filesDir}/$FILENAME")
+        PdfGeneratorUtils().createPdf(FileOutputStream(file), activity)
+        pdfView.fromFile(file).spacing(10).load()
     }
 }
+private const val FILENAME="driveData.pdf"

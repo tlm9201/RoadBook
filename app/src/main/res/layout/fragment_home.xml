@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:text="00:00"
         android:textSize="38sp"
+        android:textColor="#000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,6 +25,7 @@
         android:layout_height="wrap_content"
         android:text="Your Total Driving Time"
         android:textSize="12sp"
+        android:textColor="#000000"
         app:layout_constraintBottom_toTopOf="@+id/timerText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -34,6 +36,7 @@
         android:layout_height="47dp"
         android:onClick="startDrive"
         android:text="New Drive"
+        android:textColor="#000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/timerText" />
@@ -70,6 +73,7 @@
         android:layout_marginBottom="1dp"
         android:text="Nighttime Driving Progress"
         android:textSize="14sp"
+        android:textColor="#000000"
         app:layout_constraintBottom_toTopOf="@+id/nighttimeProgressBar"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -81,6 +85,7 @@
         android:layout_marginBottom="1dp"
         android:text="10hrs required"
         android:textSize="12sp"
+        android:textColor="#000000"
         app:layout_constraintBottom_toTopOf="@+id/nighttimeProgressBar"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -91,6 +96,7 @@
         android:layout_marginEnd="15dp"
         android:layout_marginBottom="1dp"
         android:text="50hrs required"
+        android:textColor="#000000"
         android:textSize="12sp"
         app:layout_constraintBottom_toTopOf="@+id/totalProgressBar"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -102,6 +108,7 @@
         android:layout_marginStart="16dp"
         android:text="00:00"
         android:textSize="18sp"
+        android:textColor="#000000"
         app:layout_constraintBottom_toTopOf="@+id/nighttimeDrivingProgressTitle"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -113,6 +120,7 @@
         android:layout_marginBottom="1dp"
         android:text="Total Driving Progress"
         android:textSize="14sp"
+        android:textColor="#000000"
         app:layout_constraintBottom_toTopOf="@+id/totalProgressBar"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -124,6 +132,7 @@
         android:layout_marginBottom="1dp"
         android:text="00:00"
         android:textSize="18sp"
+        android:textColor="#000000"
         app:layout_constraintBottom_toTopOf="@+id/totalDrivingProgressTitle"
         app:layout_constraintStart_toStartOf="parent" />
 
